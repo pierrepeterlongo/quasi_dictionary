@@ -9,6 +9,20 @@ typedef boomphf::SingleHashFunctor<u_int64_t>  hasher_t;
 typedef boomphf::mphf<  u_int64_t, hasher_t  > boophf_t;
 
 
+template <class T,class U>
+class MyIterator : public std::iterator<std::input_iterator_tag, int>
+{
+  tuple<T,U>* _tuples ;
+public:
+  MyIterator(tuple<T,U>* tuples) :_tuples(tuples) {}
+  MyIterator(const MyIterator& mit) : _tuples(mit._tuples) {}
+  MyIterator& operator++() {++_tuples;return *this;}
+  MyIterator operator++(int) {MyIterator tmp(*this); operator++(); return tmp;}
+  bool operator==(const MyIterator& rhs) {return _tuples==rhs._tuples;}
+  bool operator!=(const MyIterator& rhs) {return _tuples!=rhs._tuples;}
+  T& operator*() {return get<0>(*_tuples);}
+};
+
 // iterator from disk file of T with buffered read
 template <class T>
 class bfile_iterator : public std::iterator<std::forward_iterator_tag, T>{
@@ -135,17 +149,19 @@ public:
     quasiDictionnary(u_int64_t nelement, Range const& input_keys_values, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1): _nelement(nelement), _gammaFactor(gammaFactor), _fingerprint_size(fingerprint_size), _nthreads(nthreads), _prob_set(_nelement,_fingerprint_size)
     {
         cout<<"mphf creating "<<nelement<<endl;
+        MyIterator<u_int64_t,u_int64_t> fti_input_keys_values (input_keys_values.begin());
+
         // Creates a MPFH containing _nelement taken from input_range
-        _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,input_keys_values,_nthreads,_gammaFactor); // TODO MAKE A VIEW ON THE FIRST ELEMENT TO ITERATE.
+        _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,fti_input_keys_values,_nthreads,_gammaFactor); // TODO MAKE A VIEW ON THE FIRST ELEMENT TO ITERATE.
         cout<<"mphf created"<<endl;
 
         _values_set = bitArraySet(nelement, value_size);
 
-
+        // inserts fingerprints of elements and values of elements
         for(auto& key_value: input_keys_values){
             const u_int64_t& indice = _bphf->lookup(get<0>(key_value));
-            _prob_set.add(indice, get<0>(key_value>));
-            _values_set.set_i(indice, get<1>(key_value>));
+            _prob_set.add(indice, get<0>(key_value));
+            _values_set.set_i(indice, get<1>(key_value));
         }
 
     }

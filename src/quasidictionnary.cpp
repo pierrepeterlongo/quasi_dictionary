@@ -25,8 +25,8 @@ int main (int argc, char* argv[]){
             }
             fclose(key_file);
 
-    file_binary<tuple<u_int64_t, u_int64_t>> keys_iterator ("../BooPHF/keyfile");
-    quasiDictionnary dico (nb_elements, keys_iterator, finger_print_size, value_size);
+    file_binary<tuple<u_int64_t, u_int64_t>> key_value_iterator ("keyfile");
+    quasiDictionnary dico (nb_elements, key_value_iterator, finger_print_size, value_size);
 }
 
 
