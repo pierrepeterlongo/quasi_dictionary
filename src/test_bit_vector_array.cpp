@@ -13,19 +13,21 @@
 
 using namespace std;
 
-typedef unsigned long long u64b;
-u64b _hash(char *key, u64b len)
-{
-	u64b result = 0;
-	while (len)
-	{
-		result += *key;
-		key++;
-		len--;
-	}
+//typedef unsigned long long u64b;
+//u64b _hash(char *key, u64b len)
+//{
+//	u64b result = 0;
+//	while (len)
+//	{
+//		result += *key;
+//		key++;
+//		len--;
+//	}
 	
-	return result;
-}
+//	return result;
+//}
+
+/*
 int main (int argc, char* argv[]){
     
     if(argc<3){
@@ -121,5 +123,5 @@ int main (int argc, char* argv[]){
     
     cout<<nbitperelem<<" "<<time_fill<<" "<<time_query<<" "<<FP_rate<<endl;
     return EXIT_SUCCESS;
-}
+}*/
 
