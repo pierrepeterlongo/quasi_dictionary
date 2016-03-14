@@ -21,7 +21,7 @@ int main (int argc, char* argv[]){
             for (u_int64_t i = 0; i < nb_elements; i++)
             {
                 tuple<u_int64_t,u_int64_t> value (i, std::rand());
-                fwrite(&current, sizeof(tuple<u_int64_t,u_int64_t>), 1, key_file);
+                fwrite(&value, sizeof(tuple<u_int64_t,u_int64_t>), 1, key_file);
             }
             fclose(key_file);
 

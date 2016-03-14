@@ -23,6 +23,130 @@ public:
   T& operator*() {return get<0>(*_tuples);}
 };
 
+
+
+
+// iterator from disk file of T with buffered read
+template <class T>
+class bfile_iterator_first : public std::iterator<std::forward_iterator_tag, T>{
+public:
+	
+	bfile_iterator_first()
+	: _is(nullptr)
+	, _pos(0) ,_inbuff (0), _cptread(0)
+	{
+		_buffsize = 10000;
+		_buffer = (T *) malloc(_buffsize*sizeof(T));
+	}
+	
+	bfile_iterator_first(const bfile_iterator_first& cr)
+	{
+		_buffsize = cr._buffsize;
+		_pos = cr._pos;
+		_is = cr._is;
+		_buffer = (T *) malloc(_buffsize*sizeof(T));
+		memcpy(_buffer,cr._buffer,_buffsize*sizeof(T) );
+		_inbuff = cr._inbuff;
+		_cptread = cr._cptread;
+		_elem = cr._elem;
+	}
+	
+	bfile_iterator_first(FILE* is): _is(is) , _pos(0) ,_inbuff (0), _cptread(0)
+	{
+		_buffsize = 10000;
+		_buffer = (T *) malloc(_buffsize*sizeof(T));
+		int reso = fseek(_is,0,SEEK_SET);
+		advance();
+	}
+	
+	~bfile_iterator_first()
+	{
+		if(_buffer!=NULL)
+			free(_buffer);
+	}
+	
+	
+	T const& operator*()  {  return _elem;  }
+	
+	bfile_iterator_first& operator++()
+	{
+		advance();
+		return *this;
+	}
+	
+	friend bool operator==(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs)
+	{
+		if (!lhs._is || !rhs._is)  {  if (!lhs._is && !rhs._is) {  return true; } else {  return false;  } }
+		assert(lhs._is == rhs._is);
+		return rhs._pos == lhs._pos;
+	}
+	
+	friend bool operator!=(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs)  {  return !(lhs == rhs);  }
+private:
+	void advance()
+	{
+		_pos++;
+		
+		if(_cptread >= _inbuff)
+		{
+			int res = fread(_buffer,sizeof(T),_buffsize,_is);
+			_inbuff = res; _cptread = 0;
+			
+			if(res == 0)
+			{
+				_is = nullptr;
+				_pos = 0;
+				return;
+			}
+		}
+		
+		_elem = _buffer[_cptread];
+		_cptread ++;
+		_cptread ++;
+	}
+	T _elem;
+	FILE * _is;
+	unsigned long _pos;
+	
+	T * _buffer; // for buffered read
+	int _inbuff, _cptread;
+	int _buffsize;
+};
+
+template <class T>
+class file_binary_first{
+public:
+	
+	file_binary_first(const char* filename)
+	{
+		_is = fopen(filename, "rb");
+		if (!_is) {
+			throw std::invalid_argument("Error opening " + std::string(filename));
+		}
+	}
+	
+	~file_binary_first()
+	{
+		fclose(_is);
+	}
+	
+	bfile_iterator_first<T> begin() const
+	{
+		return bfile_iterator_first<T>(_is);
+	}
+	
+	bfile_iterator_first<T> end() const {return bfile_iterator_first<T>(); }
+	
+	size_t        size () const  {  return 0;  }//todo ?
+	
+private:
+	FILE * _is;
+};
+
+
+
+
+
 // iterator from disk file of T with buffered read
 template <class T>
 class bfile_iterator : public std::iterator<std::forward_iterator_tag, T>{
@@ -149,12 +273,28 @@ public:
     quasiDictionnary(u_int64_t nelement, Range const& input_keys_values, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1): _nelement(nelement), _gammaFactor(gammaFactor), _fingerprint_size(fingerprint_size), _nthreads(nthreads), _prob_set(_nelement,_fingerprint_size)
     {
         cout<<"mphf creating "<<nelement<<endl;
-        MyIterator<u_int64_t,u_int64_t> fti_input_keys_values (input_keys_values.begin());
+		
+		printf("iterate over key-values \n");
+		for (auto var : input_keys_values)
+		{
+			printf("%lli  %lli\n",std::get<0>(var),std::get<1>(var));
+		}
+		
+		
+		printf("iterate over key only \n");
+		file_binary_first<u_int64_t> key_iterator ("keyfile");
+		for (auto var : key_iterator)
+		{
+			printf("%lli \n",var);
+		}
+		
 
+		
         // Creates a MPFH containing _nelement taken from input_range
-        _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,fti_input_keys_values,_nthreads,_gammaFactor); // TODO MAKE A VIEW ON THE FIRST ELEMENT TO ITERATE.
+        _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,key_iterator,_nthreads,_gammaFactor); // TODO MAKE A VIEW ON THE FIRST ELEMENT TO ITERATE.
         cout<<"mphf created"<<endl;
 
+		/*
         _values_set = bitArraySet(nelement, value_size);
 
         // inserts fingerprints of elements and values of elements
@@ -163,7 +303,7 @@ public:
             _prob_set.add(indice, get<0>(key_value));
             _values_set.set_i(indice, get<1>(key_value));
         }
-
+*/
     }
 
 private:
