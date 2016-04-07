@@ -1,12 +1,16 @@
 #ifndef QUASIDICTIONNARY_H
 #define QUASIDICTIONNARY_H
 
+
+//#include "IteratorGzMPHF.hpp"
+//#include "../BooPHF/BooPHF.h"
 #include <iostream>
-#include <native_bit_vector_array.h>
-#include <probabilistic_set.h>
-#include <BooPHF.h>
+#include "native_bit_vector_array.h"
+#include "probabilistic_set.h"
+
 typedef boomphf::SingleHashFunctor<u_int64_t>  hasher_t;
 typedef boomphf::mphf<  u_int64_t, hasher_t  > boophf_t;
+
 
 
 template <class T,class U>
@@ -233,6 +237,9 @@ class bfile_iterator : public std::iterator<std::forward_iterator_tag, T>{
     int _buffsize;
 };
 
+
+
+
 template <class T>
 class file_binary{
     public:
@@ -263,58 +270,120 @@ class file_binary{
     FILE * _is;
 };
 
+
+
+template <typename RangeKeyOnly, typename RangeKeyValue>
 class quasiDictionnary
 {
 public:
 
     // Creates a probabilisticSet for the set of elements.
     // Creates a MPHF for the elements
-    template <typename Range>
-    quasiDictionnary(u_int64_t nelement, Range const& input_keys_values, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1): _nelement(nelement), _gammaFactor(gammaFactor), _fingerprint_size(fingerprint_size), _nthreads(nthreads), _prob_set(_nelement,_fingerprint_size)
+    quasiDictionnary(u_int64_t nelement, RangeKeyOnly& itKey, RangeKeyValue& it, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
+	: _nelement(nelement), _gammaFactor(gammaFactor), _fingerprint_size(fingerprint_size), _nthreads(nthreads)
     {
-        cout<<"mphf creating "<<nelement<<endl;
+
+
+
+		_itKeyOnly = itKey;
+		_itKeyValue = it;
+		_valueSize = value_size;
+
+
+		cout << "NB elems: " << _nelement << " elems" << endl;
+		cout << "Fingerprint size: " << _fingerprint_size << " bits" << endl;
+		cout << "Value size: " << _valueSize << " bits" << endl;
+
+    	createMPHF();
+    	createValues();
+
+		//printf("iterate over key-values \n");
+		//for (auto var : input_keys_values)
+		//{
+		//	printf("%lli  %lli\n",std::get<0>(var),std::get<1>(var));
+		//}
+		//_iterator = input_keys_values;
 		
-		printf("iterate over key-values \n");
-		for (auto var : input_keys_values)
+		//printf("iterate over key only \n");
+		//IteratorKeyWrapper key_iterator(input_keys_values);
+		//iterator_first<u_int64_t> key_iterator(input_keys_values);
+		//input_keys_values.begin();
+
+		//ƒ<u_int64_t> key_iterator ("keyfile");
+
+		/*
+		for (auto var : itKey)
 		{
-			printf("%lli  %lli\n",std::get<0>(var),std::get<1>(var));
+			cout << var << endl;
+			break;
+			//cout << std::get<0>(var) << " " << std::get<1>(var) << endl;
 		}
 		
-		
-		printf("iterate over key only \n");
-		file_binary_first<u_int64_t> key_iterator ("keyfile");
-		for (auto var : key_iterator)
+		for (auto var : it)
 		{
-			printf("%lli \n",var);
-		}
-		
+			cout << std::get<0>(var) << " " << std::get<1>(var) << endl;
+			break;
+		}*/
 
 		
         // Creates a MPFH containing _nelement taken from input_range
-        _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,key_iterator,_nthreads,_gammaFactor); // TODO MAKE A VIEW ON THE FIRST ELEMENT TO ITERATE.
-        cout<<"mphf created"<<endl;
 
-		/*
-        _values_set = bitArraySet(nelement, value_size);
 
-        // inserts fingerprints of elements and values of elements
-        for(auto& key_value: input_keys_values){
-            const u_int64_t& indice = _bphf->lookup(get<0>(key_value));
-            _prob_set.add(indice, get<0>(key_value));
-            _values_set.set_i(indice, get<1>(key_value));
-        }
-*/
+
+
+
     }
+
+    void createMPHF(){
+        cout << "MPHF creating " << endl;
+        _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,_itKeyOnly,_nthreads,_gammaFactor);
+
+        cout << "MPHF created" << endl;
+    }
+
+    void createValues(){
+
+    	cout << "creating values" << endl;
+
+    	_prob_set = probabilisticSet(_nelement, _fingerprint_size);
+
+    	_values = bitArraySet(_nelement, _valueSize);
+
+        for(auto& key_value: _itKeyValue){
+        	const u_int64_t& index = _bphf->lookup(get<0>(key_value));
+        	insertValue(index, get<1>(key_value));
+        }
+    	/*
+    	_lca2values = bitArraySet(_nelement, _valueSize*2);
+
+        for(auto& key_value: _itKeyValue){
+
+
+        	u_int64_t lca = get<1>(key_value);
+            u_int32_t lca1 = getLca1(lca);
+            u_int32_t lca2 = getLca2(lca);
+
+            cout << lca1 << " " << lca2 << endl;
+            _prob_set.add(indice, get<0>(key_value));
+            //_values_set.set_i(indice, );
+        }*/
+    }
+
+
 
 private:
     probabilisticSet _prob_set;
-    bitArraySet _values_set;
+    bitArraySet _values;
     u_int64_t _nelement;
     double _gammaFactor;
     boophf_t * _bphf;
     int _nthreads;
 
     int _fingerprint_size;
+    int _valueSize;
+
+    RangeKeyOnly _itKeyOnly;
+    RangeKeyValue _itKeyValue;
 };
 
 #endif // QUASIDICTIONNARY_H

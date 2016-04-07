@@ -1,13 +1,15 @@
 
 #include <iostream>
-#include <native_bit_vector_array.h>
-#include <probabilistic_set.h>
-#include <BooPHF.h>
+#include "native_bit_vector_array.h"
+#include "probabilistic_set.h"
+//#include "../BooPHF/BooPHF.h"
 #include <chrono>
-#include <quasidictionnary.h>
+#include "quasidictionnary.h"
 
-int main (int argc, char* argv[]){
 
+int main2(int argc, char* argv[]){
+
+	/*
     int finger_print_size = 8;
     int value_size = 15;
     u_int64_t nb_elements = atoll (argv[1]);
@@ -26,7 +28,7 @@ int main (int argc, char* argv[]){
             fclose(key_file);
 
     file_binary<tuple<u_int64_t, u_int64_t>> key_value_iterator ("keyfile");
-    quasiDictionnary dico (nb_elements, key_value_iterator, finger_print_size, value_size);
+    quasiDictionnary dico (nb_elements, key_value_iterator, finger_print_size, value_size);*/
 }
 
 

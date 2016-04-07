@@ -18,6 +18,7 @@ public:
     
     bitArraySet(const uint64_t nb_elements, const int nb_bit_per_element) : _nb_elements(nb_elements), _nb_bit_per_element(nb_bit_per_element),  _nb_bit_per_unit(64)
     {
+    	cout << _nb_bit_per_element << " " << _nb_bit_per_unit << endl;
         if (_nb_bit_per_element>=_nb_bit_per_unit){
             cerr<<"Cannot create a bitArraySet for elements bigger than "<<_nb_bit_per_unit-1<<" bits"<<endl;
             exit(0);
