@@ -3,7 +3,7 @@
 
 
 //#include "IteratorGzMPHF.hpp"
-//#include "../BooPHF/BooPHF.h"
+#include "../BooPHF/BooPHF.h"
 #include <iostream>
 #include "native_bit_vector_array.h"
 #include "probabilistic_set.h"
@@ -11,7 +11,7 @@
 typedef boomphf::SingleHashFunctor<u_int64_t>  hasher_t;
 typedef boomphf::mphf<  u_int64_t, hasher_t  > boophf_t;
 
-
+/**
 
 template <class T,class U>
 class MyIterator : public std::iterator<std::input_iterator_tag, int>
@@ -28,7 +28,7 @@ public:
 };
 
 
-
+*/
 
 // iterator from disk file of T with buffered read
 template <class T>
@@ -279,6 +279,16 @@ public:
 
     // Creates a probabilisticSet for the set of elements.
     // Creates a MPHF for the elements
+    /**
+     * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+     * @param nelement: number of elements to store
+     * @param itKey: iterator over the keys to be stored
+     * @param it: iterator over the keys and their values to store
+     * @param fingerprint_size: size of the fingerprint associated to each key to verify its existance in the original set. Can be set to zero if this is not needed
+     * @param value_size: size of each value associated to each key. This must be below 62 bits.
+     * @param gammaFactor: for MPHF
+     * @param nthreads: for MPHF construction
+     */
     quasiDictionnary(u_int64_t nelement, RangeKeyOnly& itKey, RangeKeyValue& it, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
 	: _nelement(nelement), _gammaFactor(gammaFactor), _fingerprint_size(fingerprint_size), _nthreads(nthreads)
     {
@@ -333,33 +343,58 @@ public:
 
 
     }
+    /**
+     * @brief get_value: returns a value from a key in a quasi dictionnary
+     * @param key: the key of the seek value
+     * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
+     * @return 0 if nothing found (and exists set to false) or the value associated to the key else
+     */
+    u_int64_t get_value(u_int64_t key, bool &exists){
+        const u_int64_t& index = _bphf->lookup(key);
+        //TODO: what if not found by MPHF -1 ?
+        if(_fingerprint_size>0&&!_prob_set.exists(index, key)){
+                exists=false;
+                return 0;
+            }
+        exists=true;
+        return _values.get_i(index);
+    }
 
+
+
+private:
+    /**
+     * @brief createMPHF constructs the MPHF from the set of keys
+     */
     void createMPHF(){
         cout << "MPHF creating " << endl;
         _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,_itKeyOnly,_nthreads,_gammaFactor);
 
         cout << "MPHF created" << endl;
     }
-
+    /**
+     * @brief createValues once the MPHF is constructed: construct the probabilisticSet storing the fingerprints and stores the values in a newly constructed bitArraySet
+     */
     void createValues(){
 
-    	cout << "creating values" << endl;
+        cout << "creating values" << endl;
+        if(_fingerprint_size>0)
+            _prob_set = probabilisticSet(_nelement, _fingerprint_size);
 
-    	_prob_set = probabilisticSet(_nelement, _fingerprint_size);
-
-    	_values = bitArraySet(_nelement, _valueSize);
+        _values = bitArraySet(_nelement, _valueSize);
 
         for(auto& key_value: _itKeyValue){
-        	const u_int64_t& index = _bphf->lookup(get<0>(key_value));
-        	insertValue(index, get<1>(key_value));
+
+            const u_int64_t& index = _bphf->lookup(get<0>(key_value));
+            insertValue(index, get<0>(key_value), get<1>(key_value));
         }
-    	/*
-    	_lca2values = bitArraySet(_nelement, _valueSize*2);
+        /*
+        _lca2values = bitArraySet(_nelement, _valueSize*2);
 
         for(auto& key_value: _itKeyValue){
 
 
-        	u_int64_t lca = get<1>(key_value);
+            u_int64_t lca = get<1>(key_value);
             u_int32_t lca1 = getLca1(lca);
             u_int32_t lca2 = getLca2(lca);
 
@@ -369,20 +404,59 @@ public:
         }*/
     }
 
-
-
-private:
+    /**
+     * @brief insertValue Add a new key/value in the quasi dictionnary.
+     * @param index: index (from MPHF where to insert the value)
+     * @param key: key of the value (used for the fingerprint creation)
+     * @param value: value to store.
+     */
+    void insertValue(u_int64_t index, u_int64_t key, u_int64_t value){
+        if (_fingerprint_size>0){
+            _prob_set.add(index,key);
+        }
+        _values.set_i(index,value);
+    }
+    /**
+     * @brief _prob_set probabilistic set used to inform about the existance of a query element.
+     */
     probabilisticSet _prob_set;
+    /**
+     * @brief _values stores for each indexed element the value associated to a key
+     */
     bitArraySet _values;
+
+    /**
+     * @brief _nelement number of elements to be stored (fix)
+     */
     u_int64_t _nelement;
+
+
     double _gammaFactor;
+
+    /**
+     * @brief _bphf MPHF used to assign an index to a key
+     */
     boophf_t * _bphf;
     int _nthreads;
 
+    /**
+     * @brief _fingerprint_size size of the fingerprint. In [0,61]
+     */
     int _fingerprint_size;
+
+    /**
+     * @brief _valueSize Size of the stored values. In [0,61] (but zero is really, really stupid.
+     */
     int _valueSize;
 
+    /**
+     * @brief _itKeyOnly iterator on the key set
+     */
     RangeKeyOnly _itKeyOnly;
+
+    /**
+     * @brief _itKeyValue iterator on tuples key,value
+     */
     RangeKeyValue _itKeyValue;
 };
 
