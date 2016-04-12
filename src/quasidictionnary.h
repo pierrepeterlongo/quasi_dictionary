@@ -2,8 +2,8 @@
 #define QUASIDICTIONNARY_H
 
 
-//#include "IteratorGzMPHF.hpp"
-#include "../BooPHF/BooPHF.h"
+#include "IteratorGzMPHF.hpp"
+//#include "../BooPHF/BooPHF.h"
 #include <iostream>
 #include "native_bit_vector_array.h"
 #include "probabilistic_set.h"
