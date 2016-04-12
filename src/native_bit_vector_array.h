@@ -18,7 +18,7 @@ public:
     
     bitArraySet(const uint64_t nb_elements, const int nb_bit_per_element) : _nb_elements(nb_elements), _nb_bit_per_element(nb_bit_per_element),  _nb_bit_per_unit(64)
     {
-    	cout << _nb_bit_per_element << " " << _nb_bit_per_unit << endl;
+    	//cout << _nb_bit_per_element << " " << _nb_bit_per_unit << endl;
         if (_nb_bit_per_element>=_nb_bit_per_unit){
             cerr<<"Cannot create a bitArraySet for elements bigger than "<<_nb_bit_per_unit-1<<" bits"<<endl;
             exit(0);
@@ -26,14 +26,21 @@ public:
         
 //        cout<<_nb_bit_per_element/(float)_nb_bit_per_unit<<endl;
         _nb_unit = _get_starting_unit_indice(_nb_elements)+1;
-        
+        create();
+//        cout << "_nb_unit = "<<_nb_unit<<endl;
+    }
+
+    void create(){
         set_mask();
+        createTable();
+    }
+
+    void createTable(){
         _table = (uint64_t *)malloc(sizeof(uint64_t)*_nb_unit);
         if(_table == NULL){
             cerr<<"Cannot allocate bitArraySet, exit"<<endl;
             exit(0);
         }
-//        cout << "_nb_unit = "<<_nb_unit<<endl;
     }
     
     
@@ -138,6 +145,24 @@ public:
         
     }
     
+	void save(std::ostream& os) const
+	{
+
+		os.write(reinterpret_cast<char const*>(&_nb_elements), sizeof(_nb_elements));
+		os.write(reinterpret_cast<char const*>(&_nb_bit_per_element), sizeof(_nb_bit_per_element));
+		os.write(reinterpret_cast<char const*>(&_nb_unit), sizeof(_nb_unit));
+		os.write(reinterpret_cast<char const*>(_table), sizeof(uint64_t)*_nb_unit);
+
+	}
+
+	void load(std::istream& is)
+	{
+		is.read(reinterpret_cast<char*>(&_nb_elements), sizeof(_nb_elements));
+		is.read(reinterpret_cast<char*>(&_nb_bit_per_element), sizeof(_nb_bit_per_element));
+		is.read(reinterpret_cast<char*>(&_nb_unit), sizeof(_nb_unit));
+		create();
+		is.read(reinterpret_cast<char*>(_table), sizeof(uint64_t)*_nb_unit);
+	}
     
 private:
     
