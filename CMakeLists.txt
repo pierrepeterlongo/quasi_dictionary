@@ -32,4 +32,3 @@ add_executable        (${PROJECT_NAME}  ${ProjectFiles})
 # we define which libraries to be linked with project binary
 target_link_libraries (${PROJECT_NAME})
 
-

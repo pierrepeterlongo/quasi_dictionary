@@ -27,8 +27,7 @@ using namespace std;
 //	return result;
 //}
 
-/*
-int main (int argc, char* argv[]){
+int main2 (int argc, char* argv[]){
     
     if(argc<3){
 		printf("Usage :\n");
@@ -36,7 +35,10 @@ int main (int argc, char* argv[]){
 		return EXIT_FAILURE;
         
     }
-//    cout<<"####################################"<<endl;
+
+
+
+    //    cout<<"####################################"<<endl;
 //    cout<<"TESTING BITSET"<<endl;
 //    cout<<"####################################"<<endl;
     
@@ -123,5 +125,5 @@ int main (int argc, char* argv[]){
     
     cout<<nbitperelem<<" "<<time_fill<<" "<<time_query<<" "<<FP_rate<<endl;
     return EXIT_SUCCESS;
-}*/
+}
 
