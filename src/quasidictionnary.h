@@ -432,6 +432,29 @@ public:
 		_bphf->load(is);
 	}
 
+
+    /**
+     * @brief createValues once the MPHF is constructed: construct the probabilisticSet storing the fingerprints and stores the values in a newly constructed bitArraySet
+     */
+    template <class T>
+    void createGenericValues(){
+
+        cout << "creating values" << endl;
+        if(_fingerprint_size>0)
+            _prob_set = probabilisticSet(_nelement, _fingerprint_size);
+
+        _values = bitArraySet(_nelement, _valueSize);
+
+        for(auto& key_value: _itKeyValue){
+        	const u_int64_t& index = _bphf->lookup(std::get<0>(key_value));
+        	if (_fingerprint_size>0){
+        		_prob_set.add(index, std::get<0>(key_value));
+        	}
+        	_values.set_i(index, new T);
+        }
+
+    }
+
 private:
     /**
      * @brief createMPHF constructs the MPHF from the set of keys
