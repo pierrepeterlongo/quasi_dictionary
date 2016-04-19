@@ -282,74 +282,109 @@ public:
 	quasiDictionnary(){
 	}
 
-    /**
-     * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
-     * @param nelement: number of elements to store
-     * @param itKey: iterator over the keys to be stored
-     * @param it: iterator over the keys and their values to store
-     * @param fingerprint_size: size of the fingerprint associated to each key to verify its existance in the original set. Can be set to zero if this is not needed
-     * @param value_size: size of each value associated to each key. This must be below 62 bits.
-     * @param gammaFactor: for MPHF
-     * @param nthreads: for MPHF construction
-     */
-    quasiDictionnary(u_int64_t nelement, RangeKeyOnly& itKey, RangeKeyValue& it, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
-    {
+	/**
+	     * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+	     * @param nelement: number of elements to store
+	     * @param itKey: iterator over the keys to be stored
+	     * @param it: iterator over the keys and their values to store
+	     * @param fingerprint_size: size of the fingerprint associated to each key to verify its existance in the original set. Can be set to zero if this is not needed
+	     * @param value_size: size of each value associated to each key. This must be below 62 bits.
+	     * @param gammaFactor: for MPHF
+	     * @param nthreads: for MPHF construction
+	     */
+	    quasiDictionnary(u_int64_t nelement, RangeKeyOnly& itKey, RangeKeyValue& it, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
+	    {
 
 
 
-		_itKeyOnly = itKey;
-		_itKeyValue = it;
-		_valueSize = value_size;
-		_nelement = nelement;
-		_gammaFactor = gammaFactor;
-		_fingerprint_size = fingerprint_size;
-		_nthreads = nthreads;
+			_itKeyOnly = itKey;
+			_itKeyValue = it;
+			_valueSize = value_size;
+			_nelement = nelement;
+			_gammaFactor = gammaFactor;
+			_fingerprint_size = fingerprint_size;
+			_nthreads = nthreads;
 
 
 
-		cout << "NB elems: " << _nelement << " elems" << endl;
-		cout << "Fingerprint size: " << _fingerprint_size << " bits" << endl;
-		cout << "Value size: " << _valueSize << " bits" << endl;
+			cout << "NB elems: " << _nelement << " elems" << endl;
+			cout << "Fingerprint size: " << _fingerprint_size << " bits" << endl;
+			cout << "Value size: " << _valueSize << " bits" << endl;
 
-    	createMPHF();
-    	createValues();
+	    	createMPHF();
+	    	createValues();
 
-		//printf("iterate over key-values \n");
-		//for (auto var : input_keys_values)
-		//{
-		//	printf("%lli  %lli\n",std::get<0>(var),std::get<1>(var));
-		//}
-		//_iterator = input_keys_values;
-		
-		//printf("iterate over key only \n");
-		//IteratorKeyWrapper key_iterator(input_keys_values);
-		//iterator_first<u_int64_t> key_iterator(input_keys_values);
-		//input_keys_values.begin();
+			//printf("iterate over key-values \n");
+			//for (auto var : input_keys_values)
+			//{
+			//	printf("%lli  %lli\n",std::get<0>(var),std::get<1>(var));
+			//}
+			//_iterator = input_keys_values;
 
-		//ƒ<u_int64_t> key_iterator ("keyfile");
+			//printf("iterate over key only \n");
+			//IteratorKeyWrapper key_iterator(input_keys_values);
+			//iterator_first<u_int64_t> key_iterator(input_keys_values);
+			//input_keys_values.begin();
 
-		/*
-		for (auto var : itKey)
-		{
-			cout << var << endl;
-			break;
-			//cout << std::get<0>(var) << " " << std::get<1>(var) << endl;
-		}
-		
-		for (auto var : it)
-		{
-			cout << std::get<0>(var) << " " << std::get<1>(var) << endl;
-			break;
-		}*/
+			//ƒ<u_int64_t> key_iterator ("keyfile");
 
-		
-        // Creates a MPFH containing _nelement taken from input_range
+			/*
+			for (auto var : itKey)
+			{
+				cout << var << endl;
+				break;
+				//cout << std::get<0>(var) << " " << std::get<1>(var) << endl;
+			}
+
+			for (auto var : it)
+			{
+				cout << std::get<0>(var) << " " << std::get<1>(var) << endl;
+				break;
+			}*/
 
 
+	        // Creates a MPFH containing _nelement taken from input_range
 
 
 
-    }
+
+
+	    }
+
+	    /**
+	         * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+	         * @param nelement: number of elements to store
+	         * @param itKey: iterator over the keys to be stored
+	         * @param it: iterator over the keys and their values to store
+	         * @param fingerprint_size: size of the fingerprint associated to each key to verify its existance in the original set. Can be set to zero if this is not needed
+	         * @param value_size: size of each value associated to each key. This must be below 62 bits.
+	         * @param gammaFactor: for MPHF
+	         * @param nthreads: for MPHF construction
+	         */
+	        quasiDictionnary(u_int64_t nelement, RangeKeyOnly& itKey, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
+	        {
+
+
+
+	    		_itKeyOnly = itKey;
+	    		_itKeyValue = it;
+	    		_valueSize = value_size;
+	    		_nelement = nelement;
+	    		_gammaFactor = gammaFactor;
+	    		_fingerprint_size = fingerprint_size;
+	    		_nthreads = nthreads;
+
+
+
+	    		cout << "NB elems: " << _nelement << " elems" << endl;
+	    		cout << "Fingerprint size: " << _fingerprint_size << " bits" << endl;
+	    		cout << "Value size: " << _valueSize << " bits" << endl;
+
+	        	createMPHF();
+
+
+
+	        }
 
 
 	bool contains(u_int64_t key){
