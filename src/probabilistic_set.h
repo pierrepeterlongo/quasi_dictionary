@@ -38,6 +38,26 @@ public:
         return false;
     }
     
+	void save(std::ostream& os) const
+	{
+		os.write(reinterpret_cast<char const*>(&_fingerprint_size), sizeof(_fingerprint_size));
+		os.write(reinterpret_cast<char const*>(&_fingerprint_range), sizeof(_fingerprint_range));
+		os.write(reinterpret_cast<char const*>(&_nb_elements), sizeof(_nb_elements));
+		_bas.save(os);
+	}
+
+	void load(std::istream& is)
+	{
+		is.read(reinterpret_cast<char*>(&_fingerprint_size), sizeof(_fingerprint_size));
+		is.read(reinterpret_cast<char*>(&_fingerprint_range), sizeof(_fingerprint_range));
+		is.read(reinterpret_cast<char*>(&_nb_elements), sizeof(_nb_elements));
+
+		//cout << _fingerprint_size << endl;
+		//cout << _fingerprint_range << endl;
+		//cout << _nb_elements << endl;
+		_bas.load(is);
+	}
+
 private:
     
     inline uint64_t korenXor(uint64_t x){

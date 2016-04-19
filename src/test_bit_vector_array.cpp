@@ -27,7 +27,7 @@ using namespace std;
 //	return result;
 //}
 
-int main2 (int argc, char* argv[]){
+int main3 (int argc, char* argv[]){
     
     if(argc<3){
 		printf("Usage :\n");
