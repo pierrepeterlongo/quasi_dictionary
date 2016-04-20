@@ -467,27 +467,33 @@ public:
 	}
 
 
-    /**
-     * @brief createValues once the MPHF is constructed: construct the probabilisticSet storing the fingerprints and stores the values in a newly constructed bitArraySet
-     */
-    template <class T>
-    void createGenericValues(){
+	/**
+	 * @brief createValues once the MPHF is constructed: construct the probabilisticSet storing the fingerprints and stores the values in a newly constructed bitArraySet
+	 */
+	template <class T>
+	void createGenericValues(){
 
-        cout << "creating values" << endl;
-        if(_fingerprint_size>0)
-            _prob_set = probabilisticSet(_nelement, _fingerprint_size);
+		cout << "creating generic values" << endl;
 
-        _values = bitArraySet(_nelement, _valueSize);
 
-        for(auto& key: _itKeyOnly){
-        	const u_int64_t& index = _bphf->lookup(key);
-        	if (_fingerprint_size>0){
-        		_prob_set.add(index, key);
-        	}
-        	_values.set_i(index, new T);
-        }
 
-    }
+
+
+		if(_fingerprint_size>0)
+			_prob_set = probabilisticSet(_nelement, _fingerprint_size);
+
+		_values = bitArraySet(_nelement, _valueSize);
+
+		for(auto& key: _itKeyOnly){
+    		cout<<"avt "<<key<<endl;
+			const u_int64_t& index = _bphf->lookup(key);
+			if (_fingerprint_size>0){
+				_prob_set.add(index, key);
+			}
+			_values.set_i(index, (uint64_t)new T);
+		}
+
+	}
 
 private:
     /**
@@ -498,7 +504,11 @@ private:
         _bphf = new boomphf::mphf<u_int64_t,hasher_t>(_nelement,_itKeyOnly,_nthreads,_gammaFactor);
 
         cout << "MPHF created" << endl;
+
     }
+
+
+
     /**
      * @brief createValues once the MPHF is constructed: construct the probabilisticSet storing the fingerprints and stores the values in a newly constructed bitArraySet
      */
