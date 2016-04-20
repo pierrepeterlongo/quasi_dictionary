@@ -367,7 +367,6 @@ public:
 
 
 	    		_itKeyOnly = itKey;
-	    		_itKeyValue = it;
 	    		_valueSize = value_size;
 	    		_nelement = nelement;
 	    		_gammaFactor = gammaFactor;
@@ -480,10 +479,10 @@ public:
 
         _values = bitArraySet(_nelement, _valueSize);
 
-        for(auto& key_value: _itKeyValue){
-        	const u_int64_t& index = _bphf->lookup(std::get<0>(key_value));
+        for(auto& key: _itKeyOnly){
+        	const u_int64_t& index = _bphf->lookup(key);
         	if (_fingerprint_size>0){
-        		_prob_set.add(index, std::get<0>(key_value));
+        		_prob_set.add(index, key);
         	}
         	_values.set_i(index, new T);
         }
