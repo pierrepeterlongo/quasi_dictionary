@@ -73,17 +73,17 @@ public:
 	T const& operator*()  {  return _elem;  }
 
 	bfile_iterator_first& operator++()
-			{
+					{
 		advance();
 		return *this;
-			}
+					}
 
 	friend bool operator==(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs)
-			{
+					{
 		if (!lhs._is || !rhs._is)  {  if (!lhs._is && !rhs._is) {  return true; } else {  return false;  } }
 		assert(lhs._is == rhs._is);
 		return rhs._pos == lhs._pos;
-			}
+					}
 
 	friend bool operator!=(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs)  {  return !(lhs == rhs);  }
 private:
@@ -135,9 +135,9 @@ public:
 	}
 
 	bfile_iterator_first<T> begin() const
-			{
+					{
 		return bfile_iterator_first<T>(_is);
-			}
+					}
 
 	bfile_iterator_first<T> end() const {return bfile_iterator_first<T>(); }
 
@@ -194,17 +194,17 @@ public:
 	T const& operator*()  {  return _elem;  }
 
 	bfile_iterator& operator++()
-    		{
+    				{
 		advance();
 		return *this;
-    		}
+    				}
 
 	friend bool operator==(bfile_iterator const& lhs, bfile_iterator const& rhs)
-    		{
+    				{
 		if (!lhs._is || !rhs._is)  {  if (!lhs._is && !rhs._is) {  return true; } else {  return false;  } }
 		assert(lhs._is == rhs._is);
 		return rhs._pos == lhs._pos;
-    		}
+    				}
 
 	friend bool operator!=(bfile_iterator const& lhs, bfile_iterator const& rhs)  {  return !(lhs == rhs);  }
 private:
@@ -258,9 +258,9 @@ public:
 	}
 
 	bfile_iterator<T> begin() const
-    		{
+    				{
 		return bfile_iterator<T>(_is);
-    		}
+    				}
 
 	bfile_iterator<T> end() const {return bfile_iterator<T>(); }
 
@@ -289,10 +289,14 @@ public:
 	 * @brief createMPHF constructs the MPHF from the set of keys
 	 */
 	void createMPHF(){
-		cout << "MPHF creating " << endl;
+		//		cout << "MPHF creating for set: " << endl;
+		//		for (auto &element: this->_itKeyOnly){
+		//			cout<<element<<endl;
+		//		}
+
 		this->_bphf = new boomphf::mphf<u_int64_t,hasher_t>(this->_nelement,this->_itKeyOnly,this->_nthreads,this->_gammaFactor);
 
-		cout << "MPHF created" << endl;
+		//		cout << "MPHF created" << endl;
 
 	}
 protected:
@@ -513,7 +517,7 @@ public:
 		this->_fingerprint_size = fingerprint_size;
 		this->_gammaFactor = gammaFactor;
 		this->_nthreads = nthreads;
-		this->_values = std::vector< ValuesType > (this->_nelement);
+		this->_values = std::vector< vector<ValuesType> > (this->_nelement);
 
 
 		cout << "NB elems: " << this->_nelement << " elems" << endl;
@@ -522,10 +526,17 @@ public:
 		this->createMPHF();
 
 
+		if (this->_fingerprint_size>0){
+			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
+			for(auto& key: this->_itKeyOnly){
+				const u_int64_t& index = this->_bphf->lookup(key);
+				this->_prob_set.add(index, key);
+			}
+		}
 
 	}
 
-	bool set_value(u_int64_t &key, ValuesType &T){
+	bool set_value(u_int64_t key, ValuesType &value){
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX){
 			return false;
@@ -534,7 +545,9 @@ public:
 			return false;
 		}
 
-		this->_values[index]=T;
+		this->_values[index].push_back(value);
+
+//		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
 		return true;
 
 	}
@@ -552,6 +565,7 @@ public:
 			exists = false;
 			return 0;
 		}
+
 		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
 
 			exists = false;
@@ -614,7 +628,7 @@ private:
 	/**
 	 * @brief _values stores for each indexed element the value associated to a key
 	 */
-	std::vector< ValuesType > _values;
+	std::vector< vector<ValuesType> > _values;
 
 
 };
