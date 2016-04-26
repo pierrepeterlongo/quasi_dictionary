@@ -68,9 +68,9 @@ private:
     }
     
     bitArraySet _bas;
+    uint64_t _nb_elements;
     int _fingerprint_size;
     uint64_t _fingerprint_range;
-    uint64_t _nb_elements;
 };
 
 

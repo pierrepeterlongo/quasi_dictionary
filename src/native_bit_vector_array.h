@@ -189,7 +189,6 @@ private:
         _mask_element = get_mask(_nb_bit_per_element);
     }
     
-    int  _nb_bit_per_unit; // 64 or better 128
     uint64_t   _nb_unit;      // an unit = an entry of the array. A unit stores 1 or more element(s)
     uint64_t * _table;
     uint64_t   _mask_unit;
@@ -197,6 +196,7 @@ private:
     
     uint64_t   _nb_elements;     // an element is a stored stuff whose size is <= _nb_bit_per_unit
     int        _nb_bit_per_element;
+    int  _nb_bit_per_unit; // 64 or better 128
     
 };
 
