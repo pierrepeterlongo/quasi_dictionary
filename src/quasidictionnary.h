@@ -559,22 +559,22 @@ public:
 	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
-	ValuesType get_value(u_int64_t key, bool &exists){
+	void get_value(u_int64_t key, bool &exists, vector<ValuesType> & value){
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX){
 			exists = false;
-			return 0;
+			return;
 		}
 
 		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
 
 			exists = false;
-			return 0;
+			return;
 		}
 
 
 		exists = true;
-		return this->_values[index];
+		value=this->_values[index];
 	}
 
 
