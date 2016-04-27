@@ -104,7 +104,7 @@ public:
         }
     }
     
-    uint64_t get_i(const uint64_t indice_element){
+    uint64_t get_i(const uint64_t indice_element)const{
         const uint64_t starting_unit_indice = _get_starting_unit_indice(indice_element);
         const int starting_position_in_the_unit = _get_starting_position_in_the_unit(indice_element, starting_unit_indice);
 //        cout<<"element "<<indice_element<<" in array composed of "<<_nb_unit<<" units of size "<<_nb_bit_per_unit<<endl;
@@ -170,16 +170,16 @@ private:
      * Given an element_indice, returns the starting unit_indice
      * BUG WITH MORE THAN ON BILLION ELEMENTS
      */
-    inline uint64_t _get_starting_unit_indice(const uint64_t indice_element){
+    inline uint64_t _get_starting_unit_indice(const uint64_t indice_element)const{
         return ((indice_element*_nb_bit_per_element)/_nb_bit_per_unit);
     }
     
     
-    inline int _get_starting_position_in_the_unit(const uint64_t element_indice, const uint64_t starting_unit_indice){
+    inline int _get_starting_position_in_the_unit(const uint64_t element_indice, const uint64_t starting_unit_indice)const{
         return element_indice*_nb_bit_per_element - starting_unit_indice*_nb_bit_per_unit;
     }
     
-    uint64_t get_mask(const int nb_bit){
+    uint64_t get_mask(const int nb_bit)const{
         uint64_t res=~0;
         return res>>(_nb_bit_per_unit-nb_bit);
     }

@@ -31,7 +31,7 @@ public:
         _bas.set_i(i,fingerprint);
     }
     
-    bool exists(const uint64_t i, const uint64_t key){
+    bool exists(const uint64_t i, const uint64_t key) const{
         uint64_t fingerprint = korenXor(key)%_fingerprint_range;
         uint64_t stored_fingerprint = _bas.get_i(i);
         if (fingerprint == stored_fingerprint) return true;
@@ -60,7 +60,7 @@ public:
 
 private:
     
-    inline uint64_t korenXor(uint64_t x){
+    inline uint64_t korenXor(uint64_t x)const{
         x ^= (x << 21);
         x ^= (x >> 35);
         x ^= (x << 4);
