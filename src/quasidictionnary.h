@@ -560,8 +560,9 @@ public:
 			if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
 				return false;
 			}
+			vector<ValuesType> &temp_vector = this->_values[index];
 			synchro->lock();
-			this->_values[index].push_back(value);
+			temp_vector.push_back(value);
 			synchro->unlock();
 
 	//		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
