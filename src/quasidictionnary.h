@@ -638,7 +638,7 @@ private:
 	/**
 	 * @brief _values stores for each indexed element the value associated to a key
 	 */
-	std::vector< vector<ValuesType> > _values;
+	std::vector< vector<ValuesType> > _values; // back to vector
 
 
 };
