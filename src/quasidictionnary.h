@@ -488,8 +488,8 @@ private:
 
 
 
-template <typename Keys, typename ValuesType>
-class quasiDictionnaryKeyGeneric : public quasiDictionnary<Keys,ValuesType>
+template <typename Keys>
+class quasiDictionnaryKeyGeneric : public quasiDictionnary<Keys,const void *>
 {
 public:
 	// Creates a probabilisticSet for the set of elements.
@@ -517,7 +517,8 @@ public:
 		this->_fingerprint_size = fingerprint_size;
 		this->_gammaFactor = gammaFactor;
 		this->_nthreads = nthreads;
-		this->_values = std::vector< vector<ValuesType> > (this->_nelement);
+		this->_values = std::vector< const void * > (this->_nelement);
+
 
 
 		cout << "NB elems: " << this->_nelement << " elems" << endl;
@@ -536,7 +537,7 @@ public:
 
 	}
 
-	bool set_value(u_int64_t key, ValuesType &value){
+	bool set_value(u_int64_t key, const void * value){
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX){
 			return false;
@@ -545,14 +546,17 @@ public:
 			return false;
 		}
 
-		this->_values[index].push_back(value);
+		this->_values[index] = value;
 
 //		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
 		return true;
-
 	}
 
-	bool set_value(u_int64_t key, ValuesType &value, ISynchronizer* synchro){
+	void set_value_known_address(u_int64_t index, const void * value){
+			this->_values[index] = value;
+		}
+
+	bool set_value(u_int64_t key, const void *value, ISynchronizer* synchro){
 			const u_int64_t& index = this->_bphf->lookup(key);
 			if(index == ULLONG_MAX){
 				return false;
@@ -560,12 +564,10 @@ public:
 			if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
 				return false;
 			}
-			vector<ValuesType> &temp_vector = this->_values[index];
 			synchro->lock();
-			temp_vector.push_back(value);
+			this->_values[index] = value;
 			synchro->unlock();
 
-	//		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
 			return true;
 
 		}
@@ -577,26 +579,50 @@ public:
 	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
-	 void get_value(u_int64_t key, bool &exists, vector<ValuesType> & value)const{
+	const void * get_value(u_int64_t key, bool &exists)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX){
 			exists = false;
-			return;
+			return NULL;
 		}
 
 		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
 
 			exists = false;
-			return;
+			return NULL;
 		}
 
 
 		exists = true;
-		value=this->_values[index];
+		return this->_values[index];
 	}
 
+	 /**
+	  * @brief get_index: returns the index from a key in a quasi dictionnary
+	  * @param key: the key of the seek value
+	  * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
+	  * @return the index
+	  */
+	 u_int64_t get_index(u_int64_t key, bool &exists)const{
+		 const u_int64_t& index = this->_bphf->lookup(key);
+		 if(index == ULLONG_MAX){
+			 exists = false;
+			 return ULLONG_MAX;
+		 }
 
-	//	void save(std::ostream& os) const
+		 if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
+
+			 exists = false;
+			 return ULLONG_MAX;
+		 }
+
+
+		 exists = true;
+		 return index;
+	 }
+
+
+	 //	void save(std::ostream& os) const
 	//	{
 	//		os.write(reinterpret_cast<char const*>(&this->_valueSize), sizeof(this->_valueSize));
 	//		os.write(reinterpret_cast<char const*>(&this->_nelement), sizeof(this->_nelement));
@@ -638,7 +664,7 @@ private:
 	/**
 	 * @brief _values stores for each indexed element the value associated to a key
 	 */
-	std::vector< vector<ValuesType> > _values;
+	std::vector< const void * > _values;
 
 
 };
