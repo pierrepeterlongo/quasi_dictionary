@@ -98,7 +98,7 @@ class bfile_iterator_first : public std::iterator<std::forward_iterator_tag, T>{
 private:
 	void advance()
 	{
-		_pos++;
+		++_pos;
 
 		if(_cptread >= _inbuff){
 			int res = fread(_buffer,sizeof(T),_buffsize,_is);
@@ -112,8 +112,8 @@ private:
 		}
 
 		_elem = _buffer[_cptread];
-		_cptread ++;
-		_cptread ++;
+		++_cptread;
+		++_cptread;
 	}
 	T _elem;
 	FILE * _is;
@@ -217,7 +217,7 @@ public:
 private:
 	void advance()
 	{
-		_pos++;
+		++_pos;
 
 		if(_cptread >= _inbuff)
 		{
@@ -233,7 +233,7 @@ private:
 		}
 
 		_elem = _buffer[_cptread];
-		_cptread ++;
+		++_cptread;
 	}
 	T _elem;
 	FILE * _is;
@@ -420,7 +420,6 @@ public:
 		this->_prob_set.save(os);
 		this->_values.save(os);
 		this->_bphf->save(os);
-
 	}
 
 	void load(std::istream& is)
@@ -442,13 +441,10 @@ public:
 	}
 
 
-
-
 	/**
 	 * @brief createValues once the MPHF is constructed: construct the probabilisticSet storing the fingerprints and stores the values in a newly constructed bitArraySet
 	 */
 	void createValues(){
-
 		cout << "creating values" << endl;
 		if(this->_fingerprint_size>0)
 			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
@@ -462,12 +458,7 @@ public:
 			}
 			this->_values.set_i(index, std::get<1>(key_value));
 		}
-
 	}
-
-
-
-
 
 
 private:
@@ -693,19 +684,6 @@ private:
 //
 //
 //
-//
-//	/**
-//	 * @brief get_value: returns a value from a key in a quasi dictionnary
-//	 * @param key: the key of the seek value
-//	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
-//	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
-//	 */
-//	 void get_value(u_int64_t key, bool &exists, vector<ValuesType> & value)const{
-//		const u_int64_t& index = this->_bphf->lookup(key);
-//		if(index == ULLONG_MAX){
-//			exists = false;
-//			return;
-//		}
 //
 //		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
 //
