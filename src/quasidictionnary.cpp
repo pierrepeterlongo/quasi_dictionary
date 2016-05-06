@@ -31,5 +31,3 @@ int main2(int argc, char* argv[]){
 //    quasiDictionnary dico (nb_elements, key_value_iterator, finger_print_size, value_size);
     return 1;
 }
-
-

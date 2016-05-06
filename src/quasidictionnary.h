@@ -7,9 +7,16 @@
 #include <iostream>
 #include "native_bit_vector_array.h"
 #include "probabilistic_set.h"
+#include <mutex>
 
 typedef boomphf::SingleHashFunctor<u_int64_t>  hasher_t;
 typedef boomphf::mphf<  u_int64_t, hasher_t  > boophf_t;
+
+
+static const int nbMutex(10000);
+static mutex mutexMaison[nbMutex];
+
+
 
 /**
 
@@ -33,18 +40,17 @@ public:
 // iterator from disk file of T with buffered read
 template <class T>
 class bfile_iterator_first : public std::iterator<std::forward_iterator_tag, T>{
-public:
 
-	bfile_iterator_first()
-: _is(nullptr)
-, _pos(0) ,_inbuff (0), _cptread(0)
-{
+	public:
+
+
+	bfile_iterator_first() : _is(nullptr), _pos(0) ,_inbuff (0), _cptread(0){
 		_buffsize = 10000;
 		_buffer = (T *) malloc(_buffsize*sizeof(T));
-}
+	}
 
-	bfile_iterator_first(const bfile_iterator_first& cr)
-	{
+
+	bfile_iterator_first(const bfile_iterator_first& cr){
 		_buffsize = cr._buffsize;
 		_pos = cr._pos;
 		_is = cr._is;
@@ -55,16 +61,16 @@ public:
 		_elem = cr._elem;
 	}
 
-	bfile_iterator_first(FILE* is): _is(is) , _pos(0) ,_inbuff (0), _cptread(0)
-	{
+
+	bfile_iterator_first(FILE* is): _is(is) , _pos(0) ,_inbuff (0), _cptread(0){
 		_buffsize = 10000;
 		_buffer = (T *) malloc(_buffsize*sizeof(T));
 		int reso = fseek(_is,0,SEEK_SET);
 		advance();
 	}
 
-	~bfile_iterator_first()
-	{
+
+	~bfile_iterator_first(){
 		if(_buffer!=NULL)
 			free(_buffer);
 	}
@@ -72,32 +78,33 @@ public:
 
 	T const& operator*()  {  return _elem;  }
 
-	bfile_iterator_first& operator++()
-					{
+
+	bfile_iterator_first& operator++(){
 		advance();
 		return *this;
-					}
+	}
 
-	friend bool operator==(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs)
-					{
+
+	friend bool operator==(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs){
 		if (!lhs._is || !rhs._is)  {  if (!lhs._is && !rhs._is) {  return true; } else {  return false;  } }
 		assert(lhs._is == rhs._is);
 		return rhs._pos == lhs._pos;
-					}
+	}
+
 
 	friend bool operator!=(bfile_iterator_first const& lhs, bfile_iterator_first const& rhs)  {  return !(lhs == rhs);  }
+
+
 private:
 	void advance()
 	{
 		_pos++;
 
-		if(_cptread >= _inbuff)
-		{
+		if(_cptread >= _inbuff){
 			int res = fread(_buffer,sizeof(T),_buffsize,_is);
 			_inbuff = res; _cptread = 0;
 
-			if(res == 0)
-			{
+			if(res == 0){
 				_is = nullptr;
 				_pos = 0;
 				return;
@@ -119,36 +126,36 @@ private:
 
 template <class T>
 class file_binary_first{
-public:
 
-	file_binary_first(const char* filename)
-{
+	public:
+
+
+	file_binary_first(const char* filename){
 		_is = fopen(filename, "rb");
 		if (!_is) {
 			throw std::invalid_argument("Error opening " + std::string(filename));
 		}
-}
+	}
 
-	~file_binary_first()
-	{
+
+	~file_binary_first(){
 		fclose(_is);
 	}
 
-	bfile_iterator_first<T> begin() const
-					{
+
+	bfile_iterator_first<T> begin() const{
 		return bfile_iterator_first<T>(_is);
-					}
+	}
 
 	bfile_iterator_first<T> end() const {return bfile_iterator_first<T>(); }
 
-	size_t        size () const  {  return 0;  }//todo ?
+	size_t size () const{
+		return 0;
+	}//todo ?
 
 private:
 	FILE * _is;
 };
-
-
-
 
 
 // iterator from disk file of T with buffered read
@@ -341,8 +348,7 @@ class quasiDictionnaryKeyValue : public quasiDictionnary<Keys,Values>
 public:
 	// Creates a probabilisticSet for the set of elements.
 	// Creates a MPHF for the elements
-	quasiDictionnaryKeyValue(){
-	}
+	quasiDictionnaryKeyValue(){}
 
 
 	/**
@@ -395,11 +401,9 @@ public:
 			return 0;
 		}
 		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
-
 			exists = false;
 			return 0;
 		}
-
 
 		exists = true;
 		return this->_values.get_i(index);
@@ -519,12 +523,10 @@ public:
 		this->_nthreads = nthreads;
 		this->_values = std::vector< vector<ValuesType> > (this->_nelement);
 
-
 		cout << "NB elems: " << this->_nelement << " elems" << endl;
 		cout << "Fingerprint size: " << this->_fingerprint_size << " bits" << endl;
 
 		this->createMPHF();
-
 
 		if (this->_fingerprint_size>0){
 			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
@@ -533,42 +535,31 @@ public:
 				this->_prob_set.add(index, key);
 			}
 		}
-
 	}
+
 
 	bool set_value(u_int64_t key, ValuesType &value){
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
 			return false;
 		}
-		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
-			return false;
-		}
-
+		mutexMaison[key%nbMutex].lock();
 		this->_values[index].push_back(value);
-
-//		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
+		mutexMaison[key%nbMutex].unlock();
 		return true;
-
 	}
 
+
 	bool set_value(u_int64_t key, ValuesType &value, ISynchronizer* synchro){
-			const u_int64_t& index = this->_bphf->lookup(key);
-			if(index == ULLONG_MAX){
-				return false;
-			}
-			if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
-				return false;
-			}
-			vector<ValuesType> &temp_vector = this->_values[index];
-			synchro->lock();
-			temp_vector.push_back(value);
-			synchro->unlock();
-
-	//		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
-			return true;
-
+		const u_int64_t& index = this->_bphf->lookup(key);
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+			return false;
 		}
+		synchro->lock();
+		this->_values[index].push_back(value);
+		synchro->unlock();
+		return true;
+	}
 
 
 	/**
@@ -577,20 +568,12 @@ public:
 	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
-	 void get_value(u_int64_t key, bool &exists, vector<ValuesType> & value)const{
+	 void get_value(u_int64_t key, bool &exists, vector<ValuesType>& value)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
 			exists = false;
 			return;
 		}
-
-		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
-
-			exists = false;
-			return;
-		}
-
-
 		exists = true;
 		value=this->_values[index];
 	}
@@ -707,23 +690,6 @@ private:
 //
 //	}
 //
-//	bool set_value(u_int64_t key, ValuesType &value){
-//
-//		const u_int64_t& index = this->_bphf->lookup(key);
-//		if(index == ULLONG_MAX){
-//			return false;
-//		}
-//		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
-//			return false;
-//		}
-////		cout<<"adding for "<<index<<" value "<<value<<" "<<this->_values[index]<<endl;//<<" first free:"<<this->_values[index][0]+1<<endl;
-//		this->_values[index][this->_values[index][0]+1] = value; // add the new value after the last used position in the array
-//		this->_values[index][0]++; // update last used position in the array
-//
-////		for(auto &element: this->_values[index]) cout<<"elements for "<<index<<" "<<element<<endl;
-//		return true;
-//
-//	}
 //
 //
 //
