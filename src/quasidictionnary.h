@@ -288,7 +288,7 @@ public:
 		u_int64_t index = _bphf->lookup(key);
 		if(index == ULLONG_MAX) return false;
 		if(_fingerprint_size>0)
-			return _prob_set.exists(index, key);
+			return _prob_set->exists(index, key);
 		return true;
 	}
 
@@ -311,7 +311,7 @@ protected:
 	/**
 	 * @brief _prob_set probabilistic set used to inform about the existence of a query element.
 	 */
-	probabilisticSet _prob_set;
+	probabilisticSet * _prob_set;
 
 
 
@@ -402,7 +402,7 @@ public:
 			exists = false;
 			return 0;
 		}
-		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
+		if(this->_fingerprint_size>0 && !this->_prob_set->exists(index, key)){
 			exists = false;
 			return 0;
 		}
@@ -419,7 +419,7 @@ public:
 		os.write(reinterpret_cast<char const*>(&this->_gammaFactor), sizeof(this->_gammaFactor));
 		os.write(reinterpret_cast<char const*>(&this->_fingerprint_size), sizeof(this->_fingerprint_size));
 		os.write(reinterpret_cast<char const*>(&this->_nthreads), sizeof(this->_nthreads));
-		this->_prob_set.save(os);
+		this->_prob_set->save(os);
 		this->_values.save(os);
 		this->_bphf->save(os);
 	}
@@ -435,7 +435,7 @@ public:
 		is.read(reinterpret_cast<char*>(&this->_fingerprint_size), sizeof(this->_fingerprint_size));
 		//cout << _fingerprint_size << endl;
 		is.read(reinterpret_cast<char*>(&this->_nthreads), sizeof(this->_nthreads));
-		this->_prob_set.load(is);
+		this->_prob_set->load(is);
 		this->_values.load(is);
 
 		this->_bphf = new boomphf::mphf<u_int64_t,hasher_t>();
@@ -449,14 +449,14 @@ public:
 	void createValues(){
 		cout << "creating values" << endl;
 		if(this->_fingerprint_size>0)
-			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
+			this->_prob_set = new probabilisticSet(this->_nelement, this->_fingerprint_size);
 
 		this->_values = bitArraySet(this->_nelement, this->_valueSize);
 
 		for(auto& key_value: this->_itKeyValue){
 			const u_int64_t& index = this->_bphf->lookup(std::get<0>(key_value));
 			if (this->_fingerprint_size>0){
-				this->_prob_set.add(index, std::get<0>(key_value));
+				this->_prob_set->add(index, std::get<0>(key_value));
 			}
 			this->_values.set_i(index, std::get<1>(key_value));
 		}
@@ -469,7 +469,7 @@ private:
 	/**
 	 * @brief _values stores for each indexed element the value associated to a key
 	 */
-	bitArraySet _values;
+	bitArraySet& _values;
 
 	/**
 	 * @brief _valueSize Size of the stored values. In [0,61] (but zero is really, really stupid.
@@ -522,10 +522,10 @@ public:
 		this->createMPHF();
 
 		if (this->_fingerprint_size>0){
-			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
+			this->_prob_set = new probabilisticSet(this->_nelement, this->_fingerprint_size);
 			for(auto& key: this->_itKeyOnly){
 				const u_int64_t& index = this->_bphf->lookup(key);
-				this->_prob_set.add(index, key);
+				this->_prob_set->add(index, key);
 			}
 		}
 	}
@@ -533,7 +533,7 @@ public:
 
 	bool set_value(u_int64_t key, ValuesType &value){
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			return false;
 		}
 		mutexMaison[key%nbMutex].lock();
@@ -545,7 +545,7 @@ public:
 
 	bool set_value(u_int64_t key, ValuesType &value, ISynchronizer* synchro){
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			return false;
 		}
 		synchro->lock();
@@ -563,7 +563,7 @@ public:
 	 */
 	 void get_value(u_int64_t key, bool &exists, vector<ValuesType>& value)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			exists = false;
 			return;
 		}
@@ -627,10 +627,10 @@ public:
 		this->createMPHF();
 
 		if (this->_fingerprint_size>0){
-			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
+			this->_prob_set = new probabilisticSet(this->_nelement, this->_fingerprint_size);
 			for(auto& key: this->_itKeyOnly){
 				const u_int64_t& index = this->_bphf->lookup(key);
-				this->_prob_set.add(index, key);
+				this->_prob_set->add(index, key);
 			}
 		}
 	}
@@ -638,7 +638,7 @@ public:
 
 	bool set_value(u_int64_t key, ValuesType value){
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			return false;
 		}
 		mutexMaison[key%nbMutex].lock();
@@ -650,7 +650,7 @@ public:
 
 	bool set_value(u_int64_t key, ValuesType value, ISynchronizer* synchro){
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			return false;
 		}
 		synchro->lock();
@@ -668,7 +668,7 @@ public:
 	 */
 	 void get_value(u_int64_t key, bool &exists, ValuesType& value)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
-		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			exists = false;
 			return;
 		}
