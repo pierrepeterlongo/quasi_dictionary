@@ -342,6 +342,8 @@ protected:
 	Keys _itKeyOnly;
 };
 
+
+
 template <typename Keys, typename Values>
 class quasiDictionnaryKeyValue : public quasiDictionnary<Keys,Values>
 {
@@ -484,12 +486,12 @@ private:
 
 
 template <typename Keys, typename ValuesType>
-class quasiDictionnaryKeyGeneric : public quasiDictionnary<Keys,ValuesType>
+class quasiDictionnaryVectorKeyGeneric : public quasiDictionnary<Keys,ValuesType>
 {
 public:
 	// Creates a probabilisticSet for the set of elements.
 	// Creates a MPHF for the elements
-	quasiDictionnaryKeyGeneric(){
+	quasiDictionnaryVectorKeyGeneric(){
 	}
 
 
@@ -505,7 +507,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasiDictionnaryKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
+	quasiDictionnaryVectorKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
 	{
 		this->_nelement = nelement;
 		this->_itKeyOnly = itKey;
@@ -570,38 +572,6 @@ public:
 	}
 
 
-	//	void save(std::ostream& os) const
-	//	{
-	//		os.write(reinterpret_cast<char const*>(&this->_valueSize), sizeof(this->_valueSize));
-	//		os.write(reinterpret_cast<char const*>(&this->_nelement), sizeof(this->_nelement));
-	//		os.write(reinterpret_cast<char const*>(&this->_gammaFactor), sizeof(this->_gammaFactor));
-	//		os.write(reinterpret_cast<char const*>(&this->_fingerprint_size), sizeof(this->_fingerprint_size));
-	//		os.write(reinterpret_cast<char const*>(&this->_nthreads), sizeof(this->_nthreads));
-	//		this->_prob_set.save(os);
-	//		this->_values.save(os);
-	//		this->_bphf->save(os);
-	//
-	//	}
-	//
-	//	void load(std::istream& is)
-	//	{
-	//		is.read(reinterpret_cast<char*>(&this->_valueSize), sizeof(this->_valueSize));
-	//		//cout << this->_valueSize << endl;
-	//		is.read(reinterpret_cast<char*>(&this->_nelement), sizeof(this->_nelement));
-	//		//cout << this->_nelement << endl;
-	//		is.read(reinterpret_cast<char*>(&this->_gammaFactor), sizeof(this->_gammaFactor));
-	//		//cout << _gammaFactor << endl;
-	//		is.read(reinterpret_cast<char*>(&this->_fingerprint_size), sizeof(this->_fingerprint_size));
-	//		//cout << _fingerprint_size << endl;
-	//		is.read(reinterpret_cast<char*>(&this->_nthreads), sizeof(this->_nthreads));
-	//		this->_prob_set.load(is);
-	//		this->_values.load(is);
-	//
-	//        this->_bphf = new boomphf::mphf<u_int64_t,hasher_t>();
-	//		this->_bphf->load(is);
-	//	}
-
-
 
 
 
@@ -618,100 +588,5 @@ private:
 };
 
 
-//
-//
-//
-//template <typename Keys, typename Counts, typename ValuesType>
-//class quasiDictionnaryKeyGenericKnownValueNumber : public quasiDictionnary<Keys,ValuesType>
-//{
-//public:
-//	// Creates a probabilisticSet for the set of elements.
-//	// Creates a MPHF for the elements
-//	quasiDictionnaryKeyGenericKnownValueNumber(){
-//	}
-//
-//
-//
-//
-//	/**
-//	 * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
-//	 * @param nelement: number of elements to store
-//	 * @param itKey: iterator over the keys to be stored
-//	 * @param it: iterator over the keys and their values to store
-//	 * @param fingerprint_size: size of the fingerprint associated to each key to verify its existance in the original set. Can be set to zero if this is not needed
-//	 * @param value_size: size of each value associated to each key. This must be below 62 bits.
-//	 * @param gammaFactor: for MPHF
-//	 * @param nthreads: for MPHF construction
-//	 */
-//	quasiDictionnaryKeyGenericKnownValueNumber(u_int64_t nelement, Keys& itKey, Counts& itCounts, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
-//	{
-//		this->_nelement = nelement;
-//		this->_itKeyOnly = itKey;
-//		this->_fingerprint_size = fingerprint_size;
-//		this->_gammaFactor = gammaFactor;
-//		this->_nthreads = nthreads;
-//		this->_values = std::vector< ValuesType* > (this->_nelement);
-//
-//
-//		cout << "NB elems: " << this->_nelement << " elems" << endl;
-//		cout << "Fingerprint size: " << this->_fingerprint_size << " bits" << endl;
-//
-//		this->createMPHF();
-//
-//
-//		// allocate arrays of known size for each entry:
-//		u_int64_t i=0;
-//		for(auto& key: itCounts){
-//
-//			_values[i] = new ValuesType[key+1];
-//			_values[i][0]=0; // last used position is the first one.
-//			i++;
-//		}
-//
-//		cout<<"Arrays allocated"<<endl;
-//
-//
-//		if (this->_fingerprint_size>0){
-//			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
-//			for(auto& key: this->_itKeyOnly){
-//				const u_int64_t& index = this->_bphf->lookup(key);
-//				this->_prob_set.add(index, key);
-//			}
-//		}
-//
-//	}
-//
-//
-//
-//
-//
-//		if(this->_fingerprint_size>0 && !this->_prob_set.exists(index, key)){
-//
-//			exists = false;
-//			return;
-//		}
-//
-//
-//		exists = true;
-//		std::vector<ValuesType> returned_value (this->_values[index]+1, this->_values[index] + sizeof(this->_values[index]) / sizeof(ValuesType) );
-////		value=this->_values[index];
-//		value=returned_value;
-//	}
-//
-//
-//
-//
-//
-//private:
-//
-//
-//
-//	/**
-//	 * @brief _values stores for each indexed element the value associated to a key
-//	 */
-//	std::vector< ValuesType* > _values;
-//
-//
-//};
 
 #endif // QUASIDICTIONNARY_H
