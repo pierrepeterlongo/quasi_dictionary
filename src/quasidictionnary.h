@@ -589,4 +589,108 @@ private:
 
 
 
+
+template <typename Keys, typename ValuesType>
+class quasiDictionnaryKeyGeneric : public quasiDictionnary<Keys,ValuesType>
+{
+public:
+	// Creates a probabilisticSet for the set of elements.
+	// Creates a MPHF for the elements
+	quasiDictionnaryKeyGeneric(){
+	}
+
+
+
+
+	/**
+	 * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+	 * @param nelement: number of elements to store
+	 * @param itKey: iterator over the keys to be stored
+	 * @param it: iterator over the keys and their values to store
+	 * @param fingerprint_size: size of the fingerprint associated to each key to verify its existance in the original set. Can be set to zero if this is not needed
+	 * @param value_size: size of each value associated to each key. This must be below 62 bits.
+	 * @param gammaFactor: for MPHF
+	 * @param nthreads: for MPHF construction
+	 */
+	quasiDictionnaryKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
+	{
+		this->_nelement = nelement;
+		this->_itKeyOnly = itKey;
+		this->_fingerprint_size = fingerprint_size;
+		this->_gammaFactor = gammaFactor;
+		this->_nthreads = nthreads;
+		this->_values = std::vector< ValuesType > (this->_nelement);
+
+		cout << "NB elems: " << this->_nelement << " elems" << endl;
+		cout << "Fingerprint size: " << this->_fingerprint_size << " bits" << endl;
+
+		this->createMPHF();
+
+		if (this->_fingerprint_size>0){
+			this->_prob_set = probabilisticSet(this->_nelement, this->_fingerprint_size);
+			for(auto& key: this->_itKeyOnly){
+				const u_int64_t& index = this->_bphf->lookup(key);
+				this->_prob_set.add(index, key);
+			}
+		}
+	}
+
+
+	bool set_value(u_int64_t key, ValuesType value){
+		const u_int64_t& index = this->_bphf->lookup(key);
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+			return false;
+		}
+		mutexMaison[key%nbMutex].lock();
+		this->_values[index] = value;
+		mutexMaison[key%nbMutex].unlock();
+		return true;
+	}
+
+
+	bool set_value(u_int64_t key, ValuesType value, ISynchronizer* synchro){
+		const u_int64_t& index = this->_bphf->lookup(key);
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+			return false;
+		}
+		synchro->lock();
+		this->_values[index] = value;
+		synchro->unlock();
+		return true;
+	}
+
+
+	/**
+	 * @brief get_value: returns a value from a key in a quasi dictionnary
+	 * @param key: the key of the seek value
+	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
+	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
+	 */
+	 void get_value(u_int64_t key, bool &exists, ValuesType& value)const{
+		const u_int64_t& index = this->_bphf->lookup(key);
+		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set.exists(index, key))){
+			exists = false;
+			return;
+		}
+		exists = true;
+		value=this->_values[index];
+	}
+
+
+
+
+
+private:
+
+
+
+	/**
+	 * @brief _values stores for each indexed element the value associated to a key
+	 */
+	std::vector< ValuesType > _values;
+
+
+};
+
+
 #endif // QUASIDICTIONNARY_H
