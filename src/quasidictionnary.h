@@ -523,7 +523,7 @@ public:
 
 		if (this->_fingerprint_size>0){
 			this->_prob_set = new probabilisticSet(this->_nelement, this->_fingerprint_size);
-			for(auto& key: this->_itKeyOnly){
+			for(const auto& key: this->_itKeyOnly){
 				const u_int64_t& index = this->_bphf->lookup(key);
 				this->_prob_set->add(index, key);
 			}
@@ -628,7 +628,7 @@ public:
 
 		if (this->_fingerprint_size>0){
 			this->_prob_set = new probabilisticSet(this->_nelement, this->_fingerprint_size);
-			for(auto& key: this->_itKeyOnly){
+			for(const auto& key: this->_itKeyOnly){
 				const u_int64_t& index = this->_bphf->lookup(key);
 				this->_prob_set->add(index, key);
 			}
