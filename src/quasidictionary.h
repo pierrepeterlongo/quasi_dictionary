@@ -1,5 +1,5 @@
-#ifndef QUASIDICTIONNARY_H
-#define QUASIDICTIONNARY_H
+#ifndef QUASIdictionary_H
+#define QUASIdictionary_H
 
 
 //#include "IteratorGzMPHF.hpp"
@@ -280,7 +280,7 @@ private:
 
 
 template <typename Keys, typename Values>
-class quasiDictionnary
+class quasidictionary
 {
 public:
 
@@ -345,16 +345,16 @@ protected:
 
 
 template <typename Keys, typename Values>
-class quasiDictionnaryKeyValue : public quasiDictionnary<Keys,Values>
+class quasidictionaryKeyValue : public quasidictionary<Keys,Values>
 {
 public:
 	// Creates a probabilisticSet for the set of elements.
 	// Creates a MPHF for the elements
-	quasiDictionnaryKeyValue(){}
+	quasidictionaryKeyValue(){}
 
 
 	/**
-	 * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+	 * @brief quasidictionary : probabilistic dictionary: may have false positives
 	 * @param nelement: number of elements to store
 	 * @param itKey: iterator over the keys to be stored
 	 * @param it: iterator over the keys and their values to store
@@ -363,7 +363,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasiDictionnaryKeyValue(u_int64_t nelement, Keys& itKey, Values& it, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
+	quasidictionaryKeyValue(u_int64_t nelement, Keys& itKey, Values& it, const int fingerprint_size, const int value_size, double gammaFactor=1, int nthreads=1)
 	{
 
 
@@ -391,9 +391,9 @@ public:
 
 
 	/**
-	 * @brief get_value: returns a value from a key in a quasi dictionnary
+	 * @brief get_value: returns a value from a key in a quasi dictionary
 	 * @param key: the key of the seek value
-	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
+	 * @param exists: set to true is detected as indexed in the quasidictionary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
 	 u_int64_t get_value(u_int64_t key, bool &exists)const{
@@ -486,19 +486,19 @@ private:
 
 
 template <typename Keys, typename ValuesType>
-class quasiDictionnaryVectorKeyGeneric : public quasiDictionnary<Keys,ValuesType>
+class quasidictionaryVectorKeyGeneric : public quasidictionary<Keys,ValuesType>
 {
 public:
 	// Creates a probabilisticSet for the set of elements.
 	// Creates a MPHF for the elements
-	quasiDictionnaryVectorKeyGeneric(){
+	quasidictionaryVectorKeyGeneric(){
 	}
 
 
 
 
 	/**
-	 * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+	 * @brief quasidictionary : probabilistic dictionary: may have false positives
 	 * @param nelement: number of elements to store
 	 * @param itKey: iterator over the keys to be stored
 	 * @param it: iterator over the keys and their values to store
@@ -507,7 +507,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasiDictionnaryVectorKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
+	quasidictionaryVectorKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
 	{
 		this->_nelement = nelement;
 		this->_itKeyOnly = itKey;
@@ -556,9 +556,9 @@ public:
 
 
 	/**
-	 * @brief get_value: returns a value from a key in a quasi dictionnary
+	 * @brief get_value: returns a value from a key in a quasi dictionary
 	 * @param key: the key of the seek value
-	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
+	 * @param exists: set to true is detected as indexed in the quasidictionary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
 	 void get_value(u_int64_t key, bool &exists, vector<ValuesType>& value)const{
@@ -591,19 +591,19 @@ private:
 
 
 template <typename Keys, typename ValuesType>
-class quasiDictionnaryKeyGeneric : public quasiDictionnary<Keys,ValuesType>
+class quasidictionaryKeyGeneric : public quasidictionary<Keys,ValuesType>
 {
 public:
 	// Creates a probabilisticSet for the set of elements.
 	// Creates a MPHF for the elements
-	quasiDictionnaryKeyGeneric(){
+	quasidictionaryKeyGeneric(){
 	}
 
 
 
 
 	/**
-	 * @brief quasiDictionnary : probabilistic dictionnary: may have false positives
+	 * @brief quasidictionary : probabilistic dictionary: may have false positives
 	 * @param nelement: number of elements to store
 	 * @param itKey: iterator over the keys to be stored
 	 * @param it: iterator over the keys and their values to store
@@ -612,7 +612,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasiDictionnaryKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
+	quasidictionaryKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=1, int nthreads=1)
 	{
 		this->_nelement = nelement;
 		this->_itKeyOnly = itKey;
@@ -661,9 +661,9 @@ public:
 
 
 	/**
-	 * @brief get_value: returns a value from a key in a quasi dictionnary
+	 * @brief get_value: returns a value from a key in a quasi dictionary
 	 * @param key: the key of the seek value
-	 * @param exists: set to true is detected as indexed in the quasiDictionnary, else false
+	 * @param exists: set to true is detected as indexed in the quasidictionary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
 	 void get_value(u_int64_t key, bool &exists, ValuesType& value)const{
@@ -693,4 +693,4 @@ private:
 };
 
 
-#endif // QUASIDICTIONNARY_H
+#endif // QUASIdictionary_H
