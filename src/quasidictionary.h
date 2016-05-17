@@ -2,9 +2,9 @@
 #define QUASIdictionary_H
 
 
-//#include "IteratorGzMPHF.hpp"
 //#include "../BooPHF/BooPHF.h"
 #include <iostream>
+#include <gatb/gatb_core.hpp>
 #include "native_bit_vector_array.h"
 #include "probabilistic_set.h"
 #include <mutex>
