@@ -32,8 +32,8 @@ public:
     }
     
     bool exists(const uint64_t i, const uint64_t key) const{
-        uint64_t fingerprint = korenXor(key)%_fingerprint_range;
-        uint64_t stored_fingerprint = _bas.get_i(i);
+        const uint64_t fingerprint = korenXor(key)%_fingerprint_range;
+        const uint64_t stored_fingerprint = _bas.get_i(i);
         if (fingerprint == stored_fingerprint) return true;
         return false;
     }

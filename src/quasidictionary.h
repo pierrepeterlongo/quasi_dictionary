@@ -14,7 +14,7 @@ typedef boomphf::mphf<  u_int64_t, hasher_t  > boophf_t;
 
 
 static const int nbMutex(10000);
-static mutex mutexMaison[nbMutex];
+static mutex myMutex[nbMutex];
 
 
 
@@ -533,16 +533,21 @@ public:
 
 	bool set_value(u_int64_t key, ValuesType &value){
 		const u_int64_t& index = this->_bphf->lookup(key);
+        
 		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			return false;
 		}
-		mutexMaison[key%nbMutex].lock();
+        
+		myMutex[index%nbMutex].lock();
 		this->_values[index].push_back(value);
-		mutexMaison[key%nbMutex].unlock();
+		myMutex[index%nbMutex].unlock();
 		return true;
 	}
 
 
+    /**
+     *
+     */
 	bool set_value(u_int64_t key, ValuesType &value, ISynchronizer* synchro){
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
@@ -641,9 +646,9 @@ public:
 		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			return false;
 		}
-		mutexMaison[key%nbMutex].lock();
+		myMutex[index%nbMutex].lock();
 		this->_values[index] = value;
-		mutexMaison[key%nbMutex].unlock();
+		myMutex[index%nbMutex].unlock();
 		return true;
 	}
 
