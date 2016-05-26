@@ -27,6 +27,8 @@ c++ compiler; compilation was tested with gcc and g++ version>=4.5 (Linux) and c
     cmake ..
     make
     
+    ./quasi_dictionary 1000000 12 # runs a quasi-dictionary instance with 1 million elements and a finger print of size 12
+    
     
 # Simple example and usage
 The src directory contains a file named **qd_tester.cpp** that provides a full quasi-dicitonary usage exampleexample 
