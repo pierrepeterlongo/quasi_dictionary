@@ -26,8 +26,8 @@ c++ compiler; compilation was tested with gcc and g++ version>=4.5 (Linux) and c
     cd build
     cmake ..
     make
-    
-    ./quasi_dictionary 1000000 12 # runs a quasi-dictionary instance with 1 million elements and a finger print of size 12
+    # runs a quasi-dictionary instance with 1 million elements and a finger print of size 12
+    ./quasi_dictionary 1000000 12 
     
     
 # Simple example and usage
