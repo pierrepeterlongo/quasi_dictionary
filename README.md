@@ -22,12 +22,9 @@ c++ compiler; compilation was tested with gcc and g++ version>=4.5 (Linux) and c
     
     # compile the code an run a simple test on your computer
     cd quasi_dictionary
-    mkdir build
-    cd build
-    cmake ..
     make
     # runs a quasi-dictionary instance with 1 million elements and a finger print of size 12
-    ./quasi_dictionary 1000000 12 
+    ./qd_test 1000000 12 
     
     
 # Simple example and usage
