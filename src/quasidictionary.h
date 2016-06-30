@@ -375,6 +375,7 @@ public:
 		this->_gammaFactor = gammaFactor;
 		this->_fingerprint_size = fingerprint_size;
 		this->_nthreads = nthreads;
+        if (this->_nthreads == 0) this->_nthreads=10; // TODO: unknown bug with this->_nthreads=0: seg fault after mpfh construction.
 
 
 
@@ -514,13 +515,14 @@ public:
 		this->_fingerprint_size = fingerprint_size;
 		this->_gammaFactor = gammaFactor;
 		this->_nthreads = nthreads;
+        if (this->_nthreads == 0) this->_nthreads=10; // TODO: unknown bug with this->_nthreads=0: seg fault after mpfh construction.
 		this->_values = std::vector< vector<ValuesType> > (this->_nelement);
 
-		cout << "NB elems: " << this->_nelement << " elems" << endl;
-		cout << "Fingerprint size: " << this->_fingerprint_size << " bits" << endl;
+		cout << "Quasidictionary: NB elems         =" << this->_nelement << " elems" << endl;
+		cout << "Quasidictionary: Fingerprint size =" << this->_fingerprint_size << " bits" << endl;
 
 		this->createMPHF();
-
+        
 		if (this->_fingerprint_size>0){
 			this->_prob_set = new probabilisticSet(this->_nelement, this->_fingerprint_size);
 			for(const auto& key: this->_itKeyOnly){
@@ -624,6 +626,7 @@ public:
 		this->_fingerprint_size = fingerprint_size;
 		this->_gammaFactor = gammaFactor;
 		this->_nthreads = nthreads;
+        if (this->_nthreads == 0) this->_nthreads=10; // TODO: unknown bug with this->_nthreads=0: seg fault after mpfh construction.
 		this->_values = std::vector< ValuesType > (this->_nelement);
 
 		cout << "NB elems: " << this->_nelement << " elems" << endl;
