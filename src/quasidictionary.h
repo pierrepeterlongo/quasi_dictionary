@@ -363,7 +363,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasidictionaryKeyValue(u_int64_t nelement, Keys& itKey, Values& it, const int fingerprint_size, const int value_size, double gammaFactor=2, int nthreads=0)
+	quasidictionaryKeyValue(u_int64_t nelement, Keys& itKey, Values& it, const int fingerprint_size, const int value_size,  int nthreads=0, double gammaFactor=2)
 	{
 
 
@@ -507,7 +507,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasidictionaryVectorKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=2, int nthreads=1)
+	quasidictionaryVectorKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, int nthreads=0, double gammaFactor=2)
 	{
 		this->_nelement = nelement;
 		this->_itKeyOnly = itKey;
@@ -612,7 +612,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasidictionaryKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, double gammaFactor=2, int nthreads=1)
+	quasidictionaryKeyGeneric(u_int64_t nelement, Keys& itKey, const int fingerprint_size, int nthreads=0, double gammaFactor=2)
 	{
 		this->_nelement = nelement;
 		this->_itKeyOnly = itKey;
