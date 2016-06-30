@@ -363,7 +363,7 @@ public:
 	 * @param gammaFactor: for MPHF
 	 * @param nthreads: for MPHF construction
 	 */
-	quasidictionaryKeyValue(u_int64_t nelement, Keys& itKey, Values& it, const int fingerprint_size, const int value_size, double gammaFactor=2, int nthreads=1)
+	quasidictionaryKeyValue(u_int64_t nelement, Keys& itKey, Values& it, const int fingerprint_size, const int value_size, double gammaFactor=2, int nthreads=0)
 	{
 
 
