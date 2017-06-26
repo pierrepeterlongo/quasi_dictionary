@@ -397,7 +397,7 @@ public:
 	 * @param exists: set to true is detected as indexed in the quasidictionary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
-	 u_int64_t get_value(u_int64_t key, bool &exists)const{
+	 u_int64_t get_value(const u_int64_t key, bool &exists)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX){
 			exists = false;

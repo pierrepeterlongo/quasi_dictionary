@@ -9,7 +9,7 @@ ifeq ($(prof),1)
  CFLAGS+= -pg
 endif
 ifeq ($(deb),1)
- CFLAGS+= -O0 -DASSERTS -g
+ CFLAGS+= -O0 -DASSERTS -g -pg
 endif
 
 
