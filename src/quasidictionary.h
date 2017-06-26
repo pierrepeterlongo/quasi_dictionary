@@ -375,7 +375,7 @@ public:
 		this->_gammaFactor = gammaFactor;
 		this->_fingerprint_size = fingerprint_size;
 		this->_nthreads = nthreads;
-        if (this->_nthreads == 0) this->_nthreads=10; // TODO: unknown bug with this->_nthreads=0: seg fault after mpfh construction.
+        // if (this->_nthreads == 0) this->_nthreads=10; // TODO: unknown bug with this->_nthreads=0: seg fault after mpfh construction.
 
 
 
@@ -568,7 +568,7 @@ public:
 	 * @param exists: set to true is detected as indexed in the quasidictionary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
-	 void get_value(u_int64_t key, bool &exists, vector<ValuesType>& value)const{
+	 void get_value(const u_int64_t key, bool &exists, vector<ValuesType>& value)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			exists = false;
@@ -674,7 +674,7 @@ public:
 	 * @param exists: set to true is detected as indexed in the quasidictionary, else false
 	 * @return 0 if nothing found (and exists set to false) or the value associated to the key else
 	 */
-	 void get_value(u_int64_t key, bool &exists, ValuesType& value)const{
+	 void get_value(const u_int64_t key, bool &exists, ValuesType& value)const{
 		const u_int64_t& index = this->_bphf->lookup(key);
 		if(index == ULLONG_MAX or (this->_fingerprint_size>0 and not this->_prob_set->exists(index, key))){
 			exists = false;
