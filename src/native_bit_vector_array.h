@@ -52,6 +52,7 @@ public:
             exit(1);
         }
         const u_int64_t starting_unit_indice = _get_starting_unit_indice(indice_element);
+        
         const int starting_position_in_the_unit = _get_starting_position_in_the_unit(indice_element, starting_unit_indice);
         const int excluded_ending_position_in_the_unit=starting_position_in_the_unit+_nb_bit_per_element;
         /** case 1: the whole element is contained in the unit */
