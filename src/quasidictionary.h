@@ -618,7 +618,6 @@ public:
     {
         // save the qd
         quasidictionary<Keys,ValuesType>::save(os);
-        cerr<< "qd saved"<<endl;
         // save the _values
         // save the whole vector
         auto size = _values.size();
@@ -628,7 +627,6 @@ public:
         for (auto i=0; i<_values.size(); i++){
             serialize(os, _values[i]);
         }  
-        cerr<< "values saved"<<endl;
 
 
         
@@ -640,7 +638,6 @@ public:
     {
         // read the qd
         quasidictionary<Keys,ValuesType>::load(is);
-        cerr<< "qd loaded"<<endl;
 
         // read the values
         _values = std::vector< std::vector<ValuesType> >() ;
@@ -654,7 +651,6 @@ public:
             deserialize(is, current_vector);
             _values.push_back(current_vector);
         }
-        cerr<< "values loaded"<<endl;
     }
     
 private:
