@@ -319,7 +319,7 @@ public:
     bool load(std::istream& is){
         is.read(reinterpret_cast<char *>(&_nelement), sizeof(_nelement));
 		is.read(reinterpret_cast<char *>(&_gammaFactor), sizeof(_gammaFactor));
-		is.reac(reinterpret_cast<char *>(&_nthreads), sizeof(_nthreads));
+		is.read(reinterpret_cast<char *>(&_nthreads), sizeof(_nthreads));
         _prob_set->load(is);
         _bphf->load(is);
     }
