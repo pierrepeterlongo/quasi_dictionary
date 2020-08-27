@@ -37,6 +37,36 @@ static mutex myMutex[nbMutex];
  
  */
 
+
+
+    
+    template<typename POD>
+    std::ostream& serialize(std::ostream& os, std::vector<POD> const& v)
+    {
+        // this only works on built in data types (PODs)
+        static_assert(std::is_trivial<POD>::value && std::is_standard_layout<POD>::value,
+            "Can only serialize POD types with this function");
+
+        auto size = v.size();
+        os.write(reinterpret_cast<char const*>(&size), sizeof(size));
+        os.write(reinterpret_cast<char const*>(v.data()), v.size() * sizeof(POD));
+        return os;
+    }
+
+    template<typename POD>
+    std::istream& deserialize(std::istream& is, std::vector<POD>& v)
+    {
+        static_assert(std::is_trivial<POD>::value && std::is_standard_layout<POD>::value,
+            "Can only deserialize POD types with this function");
+
+        decltype(v.size()) size;
+        is.read(reinterpret_cast<char*>(&size), sizeof(size));
+        v.resize(size);
+        is.read(reinterpret_cast<char*>(v.data()), v.size() * sizeof(POD));
+        return is;
+    }
+
+
 // iterator from disk file of T with buffered read
 template <class T>
 class bfile_iterator_first : public std::iterator<std::forward_iterator_tag, T>{
@@ -297,30 +327,29 @@ public:
      * @brief createMPHF constructs the MPHF from the set of keys
      */
     void createMPHF(){
-        //		cout << "MPHF creating for set: " << endl;
-        //		for (auto &element: this->_itKeyOnly){
-        //			cout<<element<<endl;
-        //		}
         
         this->_bphf = new boomphf::mphf<u_int64_t,hasher_t>(this->_nelement,this->_itKeyOnly,this->_nthreads,this->_gammaFactor); // WARNING: this method does not work with n_threads==0
         
-        //		cout << "MPHF created" << endl;
         
     }
 
-    bool save(std::ostream& os){
+    void save(std::ostream& os) const {
         os.write(reinterpret_cast<char const*>(&_nelement), sizeof(_nelement));
 		os.write(reinterpret_cast<char const*>(&_gammaFactor), sizeof(_gammaFactor));
 		os.write(reinterpret_cast<char const*>(&_nthreads), sizeof(_nthreads));
+        os.write(reinterpret_cast<char const*>(&_fingerprint_size), sizeof(_fingerprint_size));
         _prob_set->save(os);
         _bphf->save(os);
     }
 
-    bool load(std::istream& is){
+    void load(std::istream& is){
         is.read(reinterpret_cast<char *>(&_nelement), sizeof(_nelement));
 		is.read(reinterpret_cast<char *>(&_gammaFactor), sizeof(_gammaFactor));
 		is.read(reinterpret_cast<char *>(&_nthreads), sizeof(_nthreads));
+		is.read(reinterpret_cast<char *>(&_fingerprint_size), sizeof(_fingerprint_size));
+        _prob_set = new probabilisticSet();
         _prob_set->load(is);
+        _bphf  = new boomphf::mphf<u_int64_t,hasher_t>();
         _bphf->load(is);
     }
 
@@ -438,35 +467,6 @@ public:
     }
     
     
-    void save(std::ostream& os) const
-    {
-        os.write(reinterpret_cast<char const*>(&this->_valueSize), sizeof(this->_valueSize));
-        os.write(reinterpret_cast<char const*>(&this->_nelement), sizeof(this->_nelement));
-        os.write(reinterpret_cast<char const*>(&this->_gammaFactor), sizeof(this->_gammaFactor));
-        os.write(reinterpret_cast<char const*>(&this->_fingerprint_size), sizeof(this->_fingerprint_size));
-        os.write(reinterpret_cast<char const*>(&this->_nthreads), sizeof(this->_nthreads));
-        this->_prob_set->save(os);
-        this->_values.save(os);
-        this->_bphf->save(os);
-    }
-    
-    void load(std::istream& is)
-    {
-        is.read(reinterpret_cast<char*>(&this->_valueSize), sizeof(this->_valueSize));
-        //cout << this->_valueSize << endl;
-        is.read(reinterpret_cast<char*>(&this->_nelement), sizeof(this->_nelement));
-        //cout << this->_nelement << endl;
-        is.read(reinterpret_cast<char*>(&this->_gammaFactor), sizeof(this->_gammaFactor));
-        //cout << _gammaFactor << endl;
-        is.read(reinterpret_cast<char*>(&this->_fingerprint_size), sizeof(this->_fingerprint_size));
-        //cout << _fingerprint_size << endl;
-        is.read(reinterpret_cast<char*>(&this->_nthreads), sizeof(this->_nthreads));
-        this->_prob_set->load(is);
-        this->_values.load(is);
-        
-        this->_bphf = new boomphf::mphf<u_int64_t,hasher_t>();
-        this->_bphf->load(is);
-    }
     
     
     /**
@@ -489,6 +489,15 @@ public:
     }
     
     
+    void save(std::ostream& os){
+        throw "save for quasidictionaryKeyValue is not implemented yet.";
+    }
+
+    
+    void load(std::ostream& is){
+        throw "load for quasidictionaryKeyValue is not implemented yet.";
+    }
+
 private:
     
     
@@ -604,8 +613,49 @@ public:
     }
     
     
-    
-    
+
+    void save(std::ostream& os) 
+    {
+        // save the qd
+        quasidictionary<Keys,ValuesType>::save(os);
+        cerr<< "qd saved"<<endl;
+        // save the _values
+        // save the whole vector
+        auto size = _values.size();
+        os.write(reinterpret_cast<char const*>(&size), sizeof(size));
+
+        // save each subvector: 
+        for (auto i=0; i<_values.size(); i++){
+            serialize(os, _values[i]);
+        }  
+        cerr<< "values saved"<<endl;
+
+
+        
+        
+    }
+
+
+    void load(std::istream& is) 
+    {
+        // read the qd
+        quasidictionary<Keys,ValuesType>::load(is);
+        cerr<< "qd loaded"<<endl;
+
+        // read the values
+        _values = std::vector< std::vector<ValuesType> >() ;
+        // read the whole vector
+        decltype(_values.size()) size;
+        is.read(reinterpret_cast<char*>(&size), sizeof(size));
+
+        // read each subvector: 
+        for (auto i=0; i<size; i++){
+            std::vector<ValuesType> current_vector;
+            deserialize(is, current_vector);
+            _values.push_back(current_vector);
+        }
+        cerr<< "values loaded"<<endl;
+    }
     
 private:
     
@@ -709,7 +759,16 @@ public:
     }
     
     
+    void save(std::ostream& os){
+        throw "save for quasidictionaryKeyGeneric is not implemented yet.";
+    }
+
     
+    void load(std::ostream& is){
+        throw "load for quasidictionaryKeyGeneric is not implemented yet.";
+    }
+
+
     
     
 private:

@@ -51,10 +51,7 @@ public:
 		is.read(reinterpret_cast<char*>(&_fingerprint_size), sizeof(_fingerprint_size));
 		is.read(reinterpret_cast<char*>(&_fingerprint_range), sizeof(_fingerprint_range));
 		is.read(reinterpret_cast<char*>(&_nb_elements), sizeof(_nb_elements));
-
-		//cout << _fingerprint_size << endl;
-		//cout << _fingerprint_range << endl;
-		//cout << _nb_elements << endl;
+        _bas = bitArraySet();
 		_bas.load(is);
 	}
 
