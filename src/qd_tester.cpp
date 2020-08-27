@@ -18,7 +18,7 @@ int main (int argc, char* argv[]){
 		return EXIT_FAILURE;
         
     }
-
+    
 
 
     cout<<"####################################"<<endl;
@@ -76,8 +76,10 @@ int main (int argc, char* argv[]){
 
     auto time_query = std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count()/nb_queries;
     auto FP_rate = (100*nb_FP)/(float)(nb_queries);
-    
+    cout<<"nbitperelem time_fill  time_query  FP_rate"<<endl;
     cout<<nbitperelem<<" "<<time_fill<<" "<<time_query<<" "<<FP_rate<<endl;
+
+
     return EXIT_SUCCESS;
 }
 

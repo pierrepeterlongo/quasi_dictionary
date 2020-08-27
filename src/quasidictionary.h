@@ -307,13 +307,26 @@ public:
         //		cout << "MPHF created" << endl;
         
     }
+
+    bool save(std::ostream& os){
+        os.write(reinterpret_cast<char const*>(&_nelement), sizeof(_nelement));
+		os.write(reinterpret_cast<char const*>(&_gammaFactor), sizeof(_gammaFactor));
+		os.write(reinterpret_cast<char const*>(&_nthreads), sizeof(_nthreads));
+        _prob_set->save(os);
+        _bphf->save(os);
+    }
+
+    bool load(std::istream& is){
+        is.read(reinterpret_cast<char *>(&_nelement), sizeof(_nelement));
+		is.read(reinterpret_cast<char *>(&_gammaFactor), sizeof(_gammaFactor));
+		is.reac(reinterpret_cast<char *>(&_nthreads), sizeof(_nthreads));
+        _prob_set->load(is);
+        _bphf->load(is);
+    }
+
+
+
 protected:
-    
-    /**
-     * @brief _prob_set probabilistic set used to inform about the existence of a query element.
-     */
-    probabilisticSet * _prob_set;
-    
     
     
     /**
@@ -321,26 +334,42 @@ protected:
      */
     u_int64_t _nelement;
     
-    
     double _gammaFactor;
     
-    /**
-     * @brief _bphf MPHF used to assign an index to a key
-     */
-    boophf_t * _bphf;
+
     int _nthreads;
     
     /**
      * @brief _fingerprint_size size of the fingerprint. In [0,61]
      */
     int _fingerprint_size;
+
+
+    /**
+     * @brief _prob_set probabilistic set used to inform about the existence of a query element.
+     */
+    probabilisticSet * _prob_set;
+    
+    
+    
+    
+    /**
+     * @brief _bphf MPHF used to assign an index to a key
+     */
+    boophf_t * _bphf;
+
     
     
     
     /**
      * @brief _itKeyOnly iterator on the key set
+     * This is used only during MPHF creation. Not serialized nor loaded when reading a dumped quasi-dictionary
      */
     Keys _itKeyOnly;
+
+
+
+
 };
 
 
