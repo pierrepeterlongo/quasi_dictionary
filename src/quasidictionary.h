@@ -494,7 +494,7 @@ public:
     }
 
     
-    void load(std::ostream& is){
+    void load(std::istream& is){
         throw "load for quasidictionaryKeyValue is not implemented yet.";
     }
 
@@ -756,16 +756,23 @@ public:
     
     
     void save(std::ostream& os){
-        throw "save for quasidictionaryKeyGeneric is not implemented yet.";
+        // save the qd
+        quasidictionary<Keys,ValuesType>::save(os);
+
+        // save the _values
+        serialize(os, _values);
     }
 
     
-    void load(std::ostream& is){
-        throw "load for quasidictionaryKeyGeneric is not implemented yet.";
+    void load(std::istream& is){
+        // read the qd
+        quasidictionary<Keys,ValuesType>::load(is);
+
+        // read the values
+        _values = std::vector< ValuesType > ();
+        deserialize(is, _values);
     }
 
-
-    
     
 private:
     
